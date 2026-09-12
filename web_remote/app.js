@@ -256,6 +256,56 @@ function sendCommand(cmd) {
   }
 }
 
+// Frame-Synchronized Motion Coalescer (Prevents Wi-Fi Jitter & Bufferbloat)
+let pendingDx = 0;
+let pendingDy = 0;
+let isMoveScheduled = false;
+
+function queueMouseMove(dx, dy) {
+  pendingDx += dx;
+  pendingDy += dy;
+
+  if (!isMoveScheduled) {
+    isMoveScheduled = true;
+    requestAnimationFrame(() => {
+      isMoveScheduled = false;
+      if (Math.abs(pendingDx) > 0.001 || Math.abs(pendingDy) > 0.001) {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          // If network is congested (bufferedAmount backed up), hold accumulation for next frame
+          if (socket.bufferedAmount < 4096) {
+            socket.send(JSON.stringify({ type: "move", dx: pendingDx, dy: pendingDy }));
+            pendingDx = 0;
+            pendingDy = 0;
+          }
+        }
+      }
+    });
+  }
+}
+
+let pendingScrollDx = 0;
+let pendingScrollDy = 0;
+let isScrollScheduled = false;
+
+function queueScroll(dx, dy) {
+  pendingScrollDx += dx;
+  pendingScrollDy += dy;
+
+  if (!isScrollScheduled) {
+    isScrollScheduled = true;
+    requestAnimationFrame(() => {
+      isScrollScheduled = false;
+      if (Math.abs(pendingScrollDx) > 0.001 || Math.abs(pendingScrollDy) > 0.001) {
+        if (socket && socket.readyState === WebSocket.OPEN && socket.bufferedAmount < 4096) {
+          socket.send(JSON.stringify({ type: "scroll", dx: pendingScrollDx, dy: pendingScrollDy }));
+          pendingScrollDx = 0;
+          pendingScrollDy = 0;
+        }
+      }
+    });
+  }
+}
+
 // Trackpad Touch & Pointer Logic
 let activePointers = new Map();
 let isDraggingMode = false;
@@ -315,7 +365,7 @@ trackpad.addEventListener("pointermove", (e) => {
     // 1-Finger move (Cursor motion) scaled by user sensitivity
     if (moveMag > DEADZONE_PX || isDraggingMode) {
       const sens = config.sensitivity || 1.0;
-      sendCommand({ type: "move", dx: dx * sens, dy: dy * sens });
+      queueMouseMove(dx * sens, dy * sens);
     }
   } else if (activePointers.size === 2) {
     // 2-Finger scroll scaled by user scroll sensitivity
@@ -323,11 +373,7 @@ trackpad.addEventListener("pointermove", (e) => {
     lastScrollTime = now;
     lastScrollDy = dy;
     const scrollSens = config.scrollSensitivity || 1.0;
-    sendCommand({
-      type: "scroll",
-      dx: dx * 0.1 * scrollSens,
-      dy: dy * 0.25 * scrollSens,
-    });
+    queueScroll(dx * 0.1 * scrollSens, dy * 0.25 * scrollSens);
   }
 });
 
@@ -564,18 +610,14 @@ if (mmSurface) {
       // 1-Finger glide on Magic Mouse surface: moves cursor
       if (moveMag > DEADZONE_PX) {
         const sens = config.sensitivity || 1.2;
-        sendCommand({ type: "move", dx: dx * sens, dy: dy * sens });
+        queueMouseMove(dx * sens, dy * sens);
       }
     } else if (mmPointers.size === 2) {
       // 2-Finger swipe on surface: scrolls smoothly
       mmLastScrollTime = now;
       mmLastScrollDy = dy;
       const scrollSens = config.scrollSensitivity || 1.0;
-      sendCommand({
-        type: "scroll",
-        dx: dx * 0.1 * scrollSens,
-        dy: dy * 0.25 * scrollSens,
-      });
+      queueScroll(dx * 0.1 * scrollSens, dy * 0.25 * scrollSens);
     }
   });
 
