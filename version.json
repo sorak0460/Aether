@@ -1,8 +1,8 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "release_date": "2026-09-12",
-  "title": "Aether v2.1.0 - Standalone Remote with Auto-Update",
-  "notes": "EXE自己アップデート、起動時バージョンチェック、ネイティブショートカット生成に対応",
+  "title": "Aether v2.2.0 - Magic Mouse Mode & Custom Shortcuts",
+  "notes": "机にスマホを平らに置いてマウスのように使えるMagicMouseモード追加、個別ショートカット割当、大型クリックゾーンに対応",
   "exe_url": "https://raw.githubusercontent.com/sorak0460/Aether/main/Aether_Setup.exe",
-  "size_bytes": 20979019
+  "size_bytes": 20985051
 }

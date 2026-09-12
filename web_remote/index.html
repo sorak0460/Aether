@@ -22,6 +22,11 @@
           <span id="statusText">Disconnected</span>
         </div>
       </div>
+      <!-- Mode Segmented Switcher -->
+      <div class="mode-segmented-control" id="modeSelector">
+        <button class="mode-btn active" id="btnModeRemote" type="button">📺 リモコン</button>
+        <button class="mode-btn" id="btnModeMagicMouse" type="button">🖱️ Magic Mouse</button>
+      </div>
       <button class="btn-icon" id="btnSettings" title="Settings">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
@@ -30,53 +35,111 @@
       </button>
     </header>
 
-    <!-- Trackpad Area -->
-    <div class="trackpad-wrapper" id="trackpad">
-      <span class="trackpad-hint" id="trackpadHint">TRACKPAD</span>
-      <span class="trackpad-subhint">Tap: Click • Hold: Drag • 2-Finger: Scroll</span>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls-grid">
-      <!-- Row 1: Click & Voice -->
-      <div class="button-row">
-        <button class="btn-remote" id="btnLeftClick" title="Left Click">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v6"/><path d="M5 8h7"/></svg>
-          <span class="btn-label">L-Click</span>
-        </button>
-
-        <button class="btn-remote mic" id="btnMic" title="Voice Input">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-        </button>
-
-        <button class="btn-remote" id="btnRightClick" title="Right Click">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v6"/><path d="M12 8h7"/></svg>
-          <span class="btn-label">R-Click</span>
-        </button>
+    <!-- View 1: Remote Control View (Apple TV style) -->
+    <div class="view-panel active" id="remoteView">
+      <!-- Trackpad Area -->
+      <div class="trackpad-wrapper" id="trackpad">
+        <span class="trackpad-hint" id="trackpadHint">TRACKPAD</span>
+        <span class="trackpad-subhint">Tap: Click • Hold: Drag • 2-Finger: Scroll</span>
       </div>
 
-      <!-- Row 2: Secondary Controls -->
-      <div class="button-row">
-        <button class="btn-remote" id="btnType" title="Type Text">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
-          <span class="btn-label">Type</span>
-        </button>
-        <button class="btn-remote" id="btnBack" title="Back / Escape">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-          <span class="btn-label">Back</span>
-        </button>
-        <button class="btn-remote" id="btnPlay" title="Play/Pause">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span class="btn-label">Play</span>
-        </button>
-        <button class="btn-remote" id="btnVolDown" title="Volume Down">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <span class="btn-label">Vol -</span>
-        </button>
-        <button class="btn-remote" id="btnVolUp" title="Volume Up">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <span class="btn-label">Vol +</span>
-        </button>
+      <!-- Controls -->
+      <div class="controls-grid">
+        <!-- Row 1: Click & Voice -->
+        <div class="button-row">
+          <button class="btn-remote" id="btnLeftClick" title="Left Click">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v6"/><path d="M5 8h7"/></svg>
+            <span class="btn-label">L-Click</span>
+          </button>
+
+          <button class="btn-remote mic" id="btnMic" title="Voice Input">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+
+          <button class="btn-remote" id="btnRightClick" title="Right Click">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v6"/><path d="M12 8h7"/></svg>
+            <span class="btn-label">R-Click</span>
+          </button>
+        </div>
+
+        <!-- Row 2: Secondary Controls -->
+        <div class="button-row">
+          <button class="btn-remote" id="btnType" title="Type Text">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
+            <span class="btn-label">Type</span>
+          </button>
+          <button class="btn-remote" id="btnBack" title="Back / Escape">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            <span class="btn-label">Back</span>
+          </button>
+          <button class="btn-remote" id="btnPlay" title="Play/Pause">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span class="btn-label">Play</span>
+          </button>
+          <button class="btn-remote" id="btnVolDown" title="Volume Down">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <span class="btn-label">Vol -</span>
+          </button>
+          <button class="btn-remote" id="btnVolUp" title="Volume Up">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <span class="btn-label">Vol +</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 2: Magic Mouse Mode View (Ergonomic Flat Surface Mouse) -->
+    <div class="view-panel" id="magicMouseView">
+      <div class="magic-mouse-body" id="magicMouseBody">
+        <!-- Prominent Left / Right Click Split Zones (Apple Magic Mouse style) -->
+        <div class="mm-click-row" id="mmClickRow">
+          <button class="mm-click-zone mm-left" id="mmLeftClick" type="button">
+            <div class="mm-click-indicator"></div>
+            <div class="mm-zone-title">LEFT CLICK</div>
+            <div class="mm-zone-desc">タップ / 押し込み</div>
+          </button>
+          <div class="mm-click-divider"></div>
+          <button class="mm-click-zone mm-right" id="mmRightClick" type="button">
+            <div class="mm-click-indicator"></div>
+            <div class="mm-zone-title">RIGHT CLICK</div>
+            <div class="mm-zone-desc">右クリック</div>
+          </button>
+        </div>
+
+        <!-- Magic Mouse Multi-touch Glass Surface -->
+        <div class="mm-surface" id="mmSurface">
+          <div class="mm-surface-glow"></div>
+          <div class="mm-surface-content">
+            <div class="mm-surface-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="6" y="2" width="12" height="20" rx="6"></rect>
+                <path d="M12 6v4"></path>
+              </svg>
+            </div>
+            <div class="mm-surface-title">TOUCH SURFACE</div>
+            <div class="mm-surface-desc">指を滑らせてカーソル移動 • 上下スワイプでスクロール</div>
+          </div>
+        </div>
+
+        <!-- Customizable Shortcut Quick Dock -->
+        <div class="mm-shortcut-dock">
+          <button class="mm-shortcut-btn" id="mmSlot1" type="button">
+            <span class="mm-sc-icon" id="mmSlot1Icon">📋</span>
+            <span class="mm-sc-label" id="mmSlot1Label">コピー</span>
+          </button>
+          <button class="mm-shortcut-btn" id="mmSlot2" type="button">
+            <span class="mm-sc-icon" id="mmSlot2Icon">📥</span>
+            <span class="mm-sc-label" id="mmSlot2Label">貼り付け</span>
+          </button>
+          <button class="mm-shortcut-btn" id="mmSlot3" type="button">
+            <span class="mm-sc-icon" id="mmSlot3Icon">📸</span>
+            <span class="mm-sc-label" id="mmSlot3Label">スクショ</span>
+          </button>
+          <button class="mm-shortcut-btn" id="mmSlot4" type="button">
+            <span class="mm-sc-icon" id="mmSlot4Icon">🔀</span>
+            <span class="mm-sc-label" id="mmSlot4Label">タスク切替</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -128,6 +191,112 @@
           <input type="checkbox" id="settingHaptic" checked>
           <span class="slider round"></span>
         </label>
+      </div>
+
+      <!-- Magic Mouse Customizable Shortcuts Section -->
+      <div class="settings-divider"></div>
+      <div class="settings-section-title">🖱️ Magic Mouse ショートカット割当</div>
+      <div class="settings-grid-2col">
+        <div class="settings-group">
+          <label class="settings-label" for="settingSlot1">スロット 1</label>
+          <select id="settingSlot1" class="settings-select">
+            <option value="copy">📋 コピー (Ctrl+C)</option>
+            <option value="paste">📥 貼り付け (Ctrl+V)</option>
+            <option value="cut">✂️ 切り取り (Ctrl+X)</option>
+            <option value="undo">↩️ 元に戻す (Ctrl+Z)</option>
+            <option value="redo">↪️ やり直す (Ctrl+Y)</option>
+            <option value="select_all">🔘 全選択 (Ctrl+A)</option>
+            <option value="save">💾 保存 (Ctrl+S)</option>
+            <option value="screenshot">📸 スクショ (Win+Shift+S)</option>
+            <option value="task_view">🪟 タスクビュー (Win+Tab)</option>
+            <option value="alt_tab">🔀 タスク切替 (Alt+Tab)</option>
+            <option value="browser_back">◀ 戻る (Alt+←)</option>
+            <option value="browser_forward">▶ 進む (Alt+→)</option>
+            <option value="tab_new">➕ 新規タブ (Ctrl+T)</option>
+            <option value="tab_close">❌ タブを閉じる (Ctrl+W)</option>
+            <option value="fullscreen">🖥️ 全画面 (F11)</option>
+            <option value="middle_click">🖱️ 中央クリック</option>
+            <option value="mute">🔇 消音 / ミュート</option>
+            <option value="play_pause">⏯️ 再生 / 一時停止</option>
+            <option value="enter">⏎ Enter</option>
+            <option value="esc">⎋ Esc</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label" for="settingSlot2">スロット 2</label>
+          <select id="settingSlot2" class="settings-select">
+            <option value="copy">📋 コピー (Ctrl+C)</option>
+            <option value="paste">📥 貼り付け (Ctrl+V)</option>
+            <option value="cut">✂️ 切り取り (Ctrl+X)</option>
+            <option value="undo">↩️ 元に戻す (Ctrl+Z)</option>
+            <option value="redo">↪️ やり直す (Ctrl+Y)</option>
+            <option value="select_all">🔘 全選択 (Ctrl+A)</option>
+            <option value="save">💾 保存 (Ctrl+S)</option>
+            <option value="screenshot">📸 スクショ (Win+Shift+S)</option>
+            <option value="task_view">🪟 タスクビュー (Win+Tab)</option>
+            <option value="alt_tab">🔀 タスク切替 (Alt+Tab)</option>
+            <option value="browser_back">◀ 戻る (Alt+←)</option>
+            <option value="browser_forward">▶ 進む (Alt+→)</option>
+            <option value="tab_new">➕ 新規タブ (Ctrl+T)</option>
+            <option value="tab_close">❌ タブを閉じる (Ctrl+W)</option>
+            <option value="fullscreen">🖥️ 全画面 (F11)</option>
+            <option value="middle_click">🖱️ 中央クリック</option>
+            <option value="mute">🔇 消音 / ミュート</option>
+            <option value="play_pause">⏯️ 再生 / 一時停止</option>
+            <option value="enter">⏎ Enter</option>
+            <option value="esc">⎋ Esc</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label" for="settingSlot3">スロット 3</label>
+          <select id="settingSlot3" class="settings-select">
+            <option value="copy">📋 コピー (Ctrl+C)</option>
+            <option value="paste">📥 貼り付け (Ctrl+V)</option>
+            <option value="cut">✂️ 切り取り (Ctrl+X)</option>
+            <option value="undo">↩️ 元に戻す (Ctrl+Z)</option>
+            <option value="redo">↪️ やり直す (Ctrl+Y)</option>
+            <option value="select_all">🔘 全選択 (Ctrl+A)</option>
+            <option value="save">💾 保存 (Ctrl+S)</option>
+            <option value="screenshot">📸 スクショ (Win+Shift+S)</option>
+            <option value="task_view">🪟 タスクビュー (Win+Tab)</option>
+            <option value="alt_tab">🔀 タスク切替 (Alt+Tab)</option>
+            <option value="browser_back">◀ 戻る (Alt+←)</option>
+            <option value="browser_forward">▶ 進む (Alt+→)</option>
+            <option value="tab_new">➕ 新規タブ (Ctrl+T)</option>
+            <option value="tab_close">❌ タブを閉じる (Ctrl+W)</option>
+            <option value="fullscreen">🖥️ 全画面 (F11)</option>
+            <option value="middle_click">🖱️ 中央クリック</option>
+            <option value="mute">🔇 消音 / ミュート</option>
+            <option value="play_pause">⏯️ 再生 / 一時停止</option>
+            <option value="enter">⏎ Enter</option>
+            <option value="esc">⎋ Esc</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label" for="settingSlot4">スロット 4</label>
+          <select id="settingSlot4" class="settings-select">
+            <option value="copy">📋 コピー (Ctrl+C)</option>
+            <option value="paste">📥 貼り付け (Ctrl+V)</option>
+            <option value="cut">✂️ 切り取り (Ctrl+X)</option>
+            <option value="undo">↩️ 元に戻す (Ctrl+Z)</option>
+            <option value="redo">↪️ やり直す (Ctrl+Y)</option>
+            <option value="select_all">🔘 全選択 (Ctrl+A)</option>
+            <option value="save">💾 保存 (Ctrl+S)</option>
+            <option value="screenshot">📸 スクショ (Win+Shift+S)</option>
+            <option value="task_view">🪟 タスクビュー (Win+Tab)</option>
+            <option value="alt_tab">🔀 タスク切替 (Alt+Tab)</option>
+            <option value="browser_back">◀ 戻る (Alt+←)</option>
+            <option value="browser_forward">▶ 進む (Alt+→)</option>
+            <option value="tab_new">➕ 新規タブ (Ctrl+T)</option>
+            <option value="tab_close">❌ タブを閉じる (Ctrl+W)</option>
+            <option value="fullscreen">🖥️ 全画面 (F11)</option>
+            <option value="middle_click">🖱️ 中央クリック</option>
+            <option value="mute">🔇 消音 / ミュート</option>
+            <option value="play_pause">⏯️ 再生 / 一時停止</option>
+            <option value="enter">⏎ Enter</option>
+            <option value="esc">⎋ Esc</option>
+          </select>
+        </div>
       </div>
 
       <button class="btn-primary" id="btnSaveSettings">Close & Apply</button>

@@ -254,3 +254,74 @@ class StandaloneInputController:
         if target_key:
             self.pynput_keyboard.press(target_key)
             self.pynput_keyboard.release(target_key)
+
+    def execute_shortcut(self, action: str):
+        """Execute keyboard shortcuts or mouse actions."""
+        act = str(action).lower().strip()
+        ctrl = Key.ctrl
+        alt = Key.alt
+        shift = Key.shift
+        cmd = Key.cmd
+
+        try:
+            if act == "copy":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("c")
+            elif act == "paste":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("v")
+            elif act == "cut":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("x")
+            elif act == "undo":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("z")
+            elif act == "redo":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("y")
+            elif act == "select_all":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("a")
+            elif act == "save":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("s")
+            elif act == "screenshot":
+                # Win + Shift + S
+                with self.pynput_keyboard.pressed(cmd):
+                    with self.pynput_keyboard.pressed(shift):
+                        self.pynput_keyboard.tap("s")
+            elif act == "task_view":
+                # Win + Tab
+                with self.pynput_keyboard.pressed(cmd):
+                    self.pynput_keyboard.tap(Key.tab)
+            elif act == "alt_tab":
+                # Alt + Tab
+                with self.pynput_keyboard.pressed(alt):
+                    self.pynput_keyboard.tap(Key.tab)
+            elif act == "browser_back":
+                with self.pynput_keyboard.pressed(alt):
+                    self.pynput_keyboard.tap(Key.left)
+            elif act == "browser_forward":
+                with self.pynput_keyboard.pressed(alt):
+                    self.pynput_keyboard.tap(Key.right)
+            elif act == "tab_new":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("t")
+            elif act == "tab_close":
+                with self.pynput_keyboard.pressed(ctrl):
+                    self.pynput_keyboard.tap("w")
+            elif act == "enter":
+                self.pynput_keyboard.tap(Key.enter)
+            elif act == "esc":
+                self.pynput_keyboard.tap(Key.esc)
+            elif act == "fullscreen":
+                self.pynput_keyboard.tap(Key.f11)
+            elif act == "mute":
+                self.pynput_keyboard.tap(Key.media_volume_mute)
+            elif act == "middle_click":
+                self.click("middle")
+            elif act == "play_pause":
+                self.pynput_keyboard.tap(Key.media_play_pause)
+        except Exception as e:
+            logger.error(f"Failed to execute shortcut {action}: {e}")
+

@@ -130,6 +130,11 @@ class WebRemoteServer:
                 if key_name:
                     self.controller.press_key(key_name)
 
+            elif msg_type == "shortcut":
+                action = msg.get("action", "")
+                if action:
+                    self.controller.execute_shortcut(action)
+
             elif msg_type == "set_config":
                 if "sensitivity" in msg:
                     self.controller.sensitivity = float(msg["sensitivity"])

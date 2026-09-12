@@ -1,6 +1,30 @@
-// Aether Web Remote Controller Client - Phase 3 + Settings Persistence
+// Aether Web Remote Controller Client - Phase 4 (Magic Mouse & Shortcuts)
 
 const CONFIG_STORAGE_KEY = "aether_web_config";
+
+// Preset Shortcut Definitions
+const SHORTCUT_DEFS = {
+  copy: { label: "コピー", icon: "📋" },
+  paste: { label: "貼り付け", icon: "📥" },
+  cut: { label: "切り取り", icon: "✂️" },
+  undo: { label: "元に戻す", icon: "↩️" },
+  redo: { label: "やり直す", icon: "↪️" },
+  select_all: { label: "全選択", icon: "🔘" },
+  save: { label: "保存", icon: "💾" },
+  screenshot: { label: "スクショ", icon: "📸" },
+  task_view: { label: "タスクビュー", icon: "🪟" },
+  alt_tab: { label: "タスク切替", icon: "🔀" },
+  browser_back: { label: "戻る", icon: "◀" },
+  browser_forward: { label: "進む", icon: "▶" },
+  tab_new: { label: "新規タブ", icon: "➕" },
+  tab_close: { label: "閉じる", icon: "❌" },
+  fullscreen: { label: "全画面", icon: "🖥️" },
+  middle_click: { label: "中央クリック", icon: "🖱️" },
+  mute: { label: "消音", icon: "🔇" },
+  play_pause: { label: "再生/停止", icon: "⏯️" },
+  enter: { label: "Enter", icon: "⏎" },
+  esc: { label: "Esc", icon: "⎋" },
+};
 
 // Default settings
 let config = {
@@ -10,6 +34,11 @@ let config = {
   scrollSensitivity: 1.0,
   accelerationEnabled: true,
   hapticEnabled: true,
+  activeMode: "remote", // "remote" | "magicmouse"
+  slot1: "copy",
+  slot2: "paste",
+  slot3: "screenshot",
+  slot4: "alt_tab",
 };
 
 // Load saved settings from localStorage
@@ -42,6 +71,12 @@ const statusText = document.getElementById("statusText");
 const trackpad = document.getElementById("trackpad");
 const trackpadHint = document.getElementById("trackpadHint");
 
+// Mode Switch Elements
+const btnModeRemote = document.getElementById("btnModeRemote");
+const btnModeMagicMouse = document.getElementById("btnModeMagicMouse");
+const remoteView = document.getElementById("remoteView");
+const magicMouseView = document.getElementById("magicMouseView");
+
 // Settings Modal DOM Elements
 const settingsModal = document.getElementById("settingsModal");
 const btnSettings = document.getElementById("btnSettings");
@@ -54,6 +89,45 @@ const settingAcceleration = document.getElementById("settingAcceleration");
 const settingHaptic = document.getElementById("settingHaptic");
 const valSensitivity = document.getElementById("valSensitivity");
 const valScroll = document.getElementById("valScroll");
+const settingSlot1 = document.getElementById("settingSlot1");
+const settingSlot2 = document.getElementById("settingSlot2");
+const settingSlot3 = document.getElementById("settingSlot3");
+const settingSlot4 = document.getElementById("settingSlot4");
+
+// Magic Mouse Shortcut Dock Elements
+const mmSlot1 = document.getElementById("mmSlot1");
+const mmSlot2 = document.getElementById("mmSlot2");
+const mmSlot3 = document.getElementById("mmSlot3");
+const mmSlot4 = document.getElementById("mmSlot4");
+const mmSlot1Icon = document.getElementById("mmSlot1Icon");
+const mmSlot1Label = document.getElementById("mmSlot1Label");
+const mmSlot2Icon = document.getElementById("mmSlot2Icon");
+const mmSlot2Label = document.getElementById("mmSlot2Label");
+const mmSlot3Icon = document.getElementById("mmSlot3Icon");
+const mmSlot3Label = document.getElementById("mmSlot3Label");
+const mmSlot4Icon = document.getElementById("mmSlot4Icon");
+const mmSlot4Label = document.getElementById("mmSlot4Label");
+
+function updateShortcutDockUI() {
+  const s1 = SHORTCUT_DEFS[config.slot1] || SHORTCUT_DEFS.copy;
+  const s2 = SHORTCUT_DEFS[config.slot2] || SHORTCUT_DEFS.paste;
+  const s3 = SHORTCUT_DEFS[config.slot3] || SHORTCUT_DEFS.screenshot;
+  const s4 = SHORTCUT_DEFS[config.slot4] || SHORTCUT_DEFS.alt_tab;
+
+  if (mmSlot1Icon) mmSlot1Icon.textContent = s1.icon;
+  if (mmSlot1Label) mmSlot1Label.textContent = s1.label;
+  if (mmSlot2Icon) mmSlot2Icon.textContent = s2.icon;
+  if (mmSlot2Label) mmSlot2Label.textContent = s2.label;
+  if (mmSlot3Icon) mmSlot3Icon.textContent = s3.icon;
+  if (mmSlot3Label) mmSlot3Label.textContent = s3.label;
+  if (mmSlot4Icon) mmSlot4Icon.textContent = s4.icon;
+  if (mmSlot4Label) mmSlot4Label.textContent = s4.label;
+
+  if (settingSlot1) settingSlot1.value = config.slot1;
+  if (settingSlot2) settingSlot2.value = config.slot2;
+  if (settingSlot3) settingSlot3.value = config.slot3;
+  if (settingSlot4) settingSlot4.value = config.slot4;
+}
 
 function updateSettingsUI() {
   settingHost.value = config.host;
@@ -63,9 +137,39 @@ function updateSettingsUI() {
   settingHaptic.checked = config.hapticEnabled;
   valSensitivity.textContent = `${Number(config.sensitivity).toFixed(1)}x`;
   valScroll.textContent = `${Number(config.scrollSensitivity).toFixed(1)}x`;
+
+  updateShortcutDockUI();
 }
 
+function setMode(mode) {
+  config.activeMode = mode;
+  if (mode === "magicmouse") {
+    btnModeMagicMouse.classList.add("active");
+    btnModeRemote.classList.remove("active");
+    magicMouseView.classList.add("active");
+    remoteView.classList.remove("active");
+  } else {
+    btnModeRemote.classList.add("active");
+    btnModeMagicMouse.classList.remove("active");
+    remoteView.classList.add("active");
+    magicMouseView.classList.remove("active");
+  }
+  saveConfig();
+}
+
+btnModeRemote.addEventListener("click", () => {
+  vibrate(20);
+  setMode("remote");
+});
+
+btnModeMagicMouse.addEventListener("click", () => {
+  vibrate(20);
+  setMode("magicmouse");
+});
+
+// Initialize UI
 updateSettingsUI();
+setMode(config.activeMode || "remote");
 
 // Haptic feedback helper
 function vibrate(ms) {
@@ -284,11 +388,27 @@ btnSaveSettings.addEventListener("click", () => {
   const hostChanged = newHost !== config.host;
 
   config.host = newHost;
+  if (settingSlot1) config.slot1 = settingSlot1.value;
+  if (settingSlot2) config.slot2 = settingSlot2.value;
+  if (settingSlot3) config.slot3 = settingSlot3.value;
+  if (settingSlot4) config.slot4 = settingSlot4.value;
+
   saveConfig();
+  updateShortcutDockUI();
   closeSettings();
 
   if (hostChanged) {
     connectWebSocket();
+  }
+});
+
+[settingSlot1, settingSlot2, settingSlot3, settingSlot4].forEach((sel, idx) => {
+  if (sel) {
+    sel.addEventListener("change", (e) => {
+      config[`slot${idx + 1}`] = e.target.value;
+      saveConfig();
+      updateShortcutDockUI();
+    });
   }
 });
 
@@ -323,6 +443,149 @@ settingHaptic.addEventListener("change", (e) => {
   config.hapticEnabled = e.target.checked;
   saveConfig();
 });
+
+// ==========================================================================
+// Magic Mouse Mode Ergonomics & Interaction Handlers
+// ==========================================================================
+const mmLeftClick = document.getElementById("mmLeftClick");
+const mmRightClick = document.getElementById("mmRightClick");
+const mmSurface = document.getElementById("mmSurface");
+
+let mmLeftHoldTimer = null;
+let mmLeftIsDragging = false;
+
+// Magic Mouse Left Click (Instant click on tap, hold >350ms for drag-and-drop)
+if (mmLeftClick) {
+  mmLeftClick.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    mmLeftClick.setPointerCapture(e.pointerId);
+    mmLeftClick.classList.add("pressed");
+    vibrate(25);
+    mmLeftIsDragging = false;
+
+    mmLeftHoldTimer = setTimeout(() => {
+      mmLeftIsDragging = true;
+      vibrate(60);
+      sendCommand({ type: "drag_start" });
+    }, 350);
+  });
+
+  function endMmLeft(e) {
+    e.preventDefault();
+    clearTimeout(mmLeftHoldTimer);
+    mmLeftClick.classList.remove("pressed");
+    if (mmLeftIsDragging) {
+      mmLeftIsDragging = false;
+      vibrate(30);
+      sendCommand({ type: "drag_end" });
+    } else {
+      sendCommand({ type: "click", btn: "left" });
+    }
+  }
+
+  mmLeftClick.addEventListener("pointerup", endMmLeft);
+  mmLeftClick.addEventListener("pointercancel", endMmLeft);
+}
+
+// Magic Mouse Right Click
+if (mmRightClick) {
+  mmRightClick.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    mmRightClick.classList.add("pressed");
+    vibrate(35);
+  });
+
+  mmRightClick.addEventListener("pointerup", (e) => {
+    e.preventDefault();
+    mmRightClick.classList.remove("pressed");
+    sendCommand({ type: "click", btn: "right" });
+  });
+
+  mmRightClick.addEventListener("pointercancel", (e) => {
+    e.preventDefault();
+    mmRightClick.classList.remove("pressed");
+  });
+}
+
+// Magic Mouse Multi-Touch Surface (Pointer tracking & 2-finger scroll)
+let mmPointers = new Map();
+let mmLastScrollTime = 0;
+let mmLastScrollDy = 0;
+
+if (mmSurface) {
+  mmSurface.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    mmSurface.setPointerCapture(e.pointerId);
+    mmPointers.set(e.pointerId, { x: e.clientX, y: e.clientY, time: Date.now() });
+    mmSurface.classList.add("active");
+  });
+
+  mmSurface.addEventListener("pointermove", (e) => {
+    e.preventDefault();
+    if (!mmPointers.has(e.pointerId)) return;
+
+    const prev = mmPointers.get(e.pointerId);
+    const now = Date.now();
+    const dx = e.clientX - prev.x;
+    const dy = e.clientY - prev.y;
+    mmPointers.set(e.pointerId, { x: e.clientX, y: e.clientY, time: now });
+
+    const moveMag = Math.hypot(dx, dy);
+
+    if (mmPointers.size === 1) {
+      // 1-Finger glide on Magic Mouse surface: moves cursor
+      if (moveMag > DEADZONE_PX) {
+        const sens = config.sensitivity || 1.2;
+        sendCommand({ type: "move", dx: dx * sens, dy: dy * sens });
+      }
+    } else if (mmPointers.size === 2) {
+      // 2-Finger swipe on surface: scrolls smoothly
+      mmLastScrollTime = now;
+      mmLastScrollDy = dy;
+      const scrollSens = config.scrollSensitivity || 1.0;
+      sendCommand({
+        type: "scroll",
+        dx: dx * 0.1 * scrollSens,
+        dy: dy * 0.25 * scrollSens,
+      });
+    }
+  });
+
+  function endMmSurface(e) {
+    e.preventDefault();
+    const wasDouble = mmPointers.size === 2;
+    mmPointers.delete(e.pointerId);
+
+    if (mmPointers.size === 0) {
+      mmSurface.classList.remove("active");
+    } else if (wasDouble && mmPointers.size === 1) {
+      const dt = Math.max(1, Date.now() - mmLastScrollTime);
+      if (dt < 80) {
+        const scrollSens = config.scrollSensitivity || 1.0;
+        const vy = (mmLastScrollDy / dt) * 1000 * scrollSens;
+        if (Math.abs(vy) > 150) {
+          sendCommand({ type: "scroll", dx: 0, dy: 0, vy: vy });
+        }
+      }
+    }
+  }
+
+  mmSurface.addEventListener("pointerup", endMmSurface);
+  mmSurface.addEventListener("pointercancel", endMmSurface);
+}
+
+// Magic Mouse Shortcut Dock Execution
+function triggerShortcut(action) {
+  if (!action) return;
+  vibrate(30);
+  sendCommand({ type: "shortcut", action: action });
+}
+
+if (mmSlot1) mmSlot1.addEventListener("click", () => triggerShortcut(config.slot1));
+if (mmSlot2) mmSlot2.addEventListener("click", () => triggerShortcut(config.slot2));
+if (mmSlot3) mmSlot3.addEventListener("click", () => triggerShortcut(config.slot3));
+if (mmSlot4) mmSlot4.addEventListener("click", () => triggerShortcut(config.slot4));
+
 
 // Text Input Modal & Voice
 const textModal = document.getElementById("textModal");
