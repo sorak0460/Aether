@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Aether Remote</title>
+  <!-- Apple iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Aether">
+  <meta name="theme-color" content="#0d0f14">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="remote-container">
+    <!-- Header -->
+    <header class="remote-header">
+      <div class="header-left">
+        <div class="logo-title">AETHER</div>
+        <div class="status-badge" id="statusBadge">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Disconnected</span>
+        </div>
+      </div>
+      <button class="btn-icon" id="btnSettings" title="Settings">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Trackpad Area -->
+    <div class="trackpad-wrapper" id="trackpad">
+      <span class="trackpad-hint" id="trackpadHint">TRACKPAD</span>
+      <span class="trackpad-subhint">Tap: Click • Hold: Drag • 2-Finger: Scroll</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-grid">
+      <!-- Row 1: Click & Voice -->
+      <div class="button-row">
+        <button class="btn-remote" id="btnLeftClick" title="Left Click">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v6"/><path d="M5 8h7"/></svg>
+          <span class="btn-label">L-Click</span>
+        </button>
+
+        <button class="btn-remote mic" id="btnMic" title="Voice Input">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+
+        <button class="btn-remote" id="btnRightClick" title="Right Click">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><path d="M12 2v6"/><path d="M12 8h7"/></svg>
+          <span class="btn-label">R-Click</span>
+        </button>
+      </div>
+
+      <!-- Row 2: Secondary Controls -->
+      <div class="button-row">
+        <button class="btn-remote" id="btnType" title="Type Text">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
+          <span class="btn-label">Type</span>
+        </button>
+        <button class="btn-remote" id="btnBack" title="Back / Escape">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          <span class="btn-label">Back</span>
+        </button>
+        <button class="btn-remote" id="btnPlay" title="Play/Pause">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span class="btn-label">Play</span>
+        </button>
+        <button class="btn-remote" id="btnVolDown" title="Volume Down">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span class="btn-label">Vol -</span>
+        </button>
+        <button class="btn-remote" id="btnVolUp" title="Volume Up">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span class="btn-label">Vol +</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal (Auto-saved) -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content settings-modal-content">
+      <div class="modal-header">
+        <h3>Settings & Tuning</h3>
+        <button class="btn-close" id="btnCloseSettings">&times;</button>
+      </div>
+      <div class="settings-group">
+        <label class="settings-label">PC Host / IP Address</label>
+        <input type="text" id="settingHost" placeholder="e.g. 192.168.1.50">
+        <span class="settings-subtext">Auto-detected from browser URL by default.</span>
+      </div>
+
+      <div class="settings-group">
+        <div class="setting-title-row">
+          <label class="settings-label">Pointer Speed: <span id="valSensitivity">1.2x</span></label>
+        </div>
+        <input type="range" id="settingSensitivity" min="0.5" max="3.0" step="0.1" value="1.2">
+      </div>
+
+      <div class="settings-group">
+        <div class="setting-title-row">
+          <label class="settings-label">Scroll Speed: <span id="valScroll">1.0x</span></label>
+        </div>
+        <input type="range" id="settingScroll" min="0.5" max="3.0" step="0.1" value="1.0">
+      </div>
+
+      <div class="settings-group toggle-row">
+        <div>
+          <label class="settings-label">Dynamic Acceleration</label>
+          <div class="settings-subtext">Apple TV dual-zone non-linear curve</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingAcceleration" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="settings-group toggle-row">
+        <div>
+          <label class="settings-label">Haptic Vibration</label>
+          <div class="settings-subtext">Touch feedback on clicks & gestures</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="settingHaptic" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <button class="btn-primary" id="btnSaveSettings">Close & Apply</button>
+    </div>
+  </div>
+
+  <!-- Text Input Modal -->
+  <div class="modal" id="textModal">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 8px;">Text Input to PC</h3>
+      <input type="text" id="textToSend" placeholder="Type text to send...">
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-remote" style="width: auto; height: 40px; padding: 0 16px; border-radius: 8px;" id="modalCancel">Cancel</button>
+        <button class="btn-remote" style="width: auto; height: 40px; padding: 0 16px; border-radius: 8px; background: #007aff;" id="modalSend">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
