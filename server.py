@@ -58,12 +58,37 @@ def print_ascii_qr(url: str):
         pass
 
 
+class SafeServer(ThreadingHTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        pass
+
+
+class SafeHTTPRequestHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
+    def log_error(self, format, *args):
+        pass
+
+    def end_headers(self):
+        try:
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        except Exception:
+            pass
+        super().end_headers()
+
+
 def run_http_server(host: str, port: int):
     """Start background HTTP static server for web_remote."""
-    handler_class = partial(SimpleHTTPRequestHandler, directory=WEB_ROOT)
-    server = ThreadingHTTPServer((host, port), handler_class)
+    handler_class = partial(SafeHTTPRequestHandler, directory=WEB_ROOT)
+    server = SafeServer((host, port), handler_class)
     logger.info("HTTP Server serving %s on http://%s:%d", WEB_ROOT, host, port)
     server.serve_forever()
+
 
 
 class WebRemoteServer:
