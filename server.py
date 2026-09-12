@@ -107,7 +107,7 @@ class WebRemoteServer:
     def __init__(self):
         self.controller = StandaloneInputController()
 
-    def process_message(self, raw_data: str):
+    def process_message(self, raw_data: str, client_ip: str = ""):
         try:
             msg = json.loads(raw_data.strip())
             msg_type = msg.get("type", "")
@@ -119,12 +119,15 @@ class WebRemoteServer:
 
             elif msg_type == "click":
                 btn = msg.get("btn", "left")
+                logger.info("Click '%s' from %s", btn, client_ip)
                 self.controller.click(btn)
 
             elif msg_type == "drag_start":
+                logger.info("Drag start from %s", client_ip)
                 self.controller.start_drag()
 
             elif msg_type == "drag_end":
+                logger.info("Drag end from %s", client_ip)
                 self.controller.end_drag()
 
             elif msg_type == "scroll":
@@ -135,16 +138,19 @@ class WebRemoteServer:
             elif msg_type == "text":
                 text = msg.get("text", "")
                 if text:
+                    logger.info("Text input (%d chars) from %s", len(text), client_ip)
                     self.controller.type_text(text)
 
             elif msg_type == "key":
                 key_name = msg.get("key", "")
                 if key_name:
+                    logger.info("Key '%s' from %s", key_name, client_ip)
                     self.controller.press_key(key_name)
 
             elif msg_type == "shortcut":
                 action = msg.get("action", "")
                 if action:
+                    logger.info("Shortcut '%s' from %s", action, client_ip)
                     self.controller.execute_shortcut(action)
 
             elif msg_type == "set_config":
@@ -152,6 +158,7 @@ class WebRemoteServer:
                     self.controller.sensitivity = float(msg["sensitivity"])
                 if "acceleration" in msg:
                     self.controller.acceleration_enabled = bool(msg["acceleration"])
+                logger.info("Config synced from %s (sens=%.1f, accel=%s)", client_ip, self.controller.sensitivity, self.controller.acceleration_enabled)
                 return {
                     "type": "ack",
                     "sensitivity": self.controller.sensitivity,
@@ -159,7 +166,7 @@ class WebRemoteServer:
                 }
 
         except Exception as e:
-            logger.error("Error handling message: %s", e)
+            logger.error("Error handling message from %s: %s", client_ip, e)
         return None
 
     async def handle_ws(self, websocket):
@@ -167,7 +174,7 @@ class WebRemoteServer:
         logger.info("Remote device connected: %s", client_ip)
         try:
             async for raw in websocket:
-                resp = self.process_message(raw)
+                resp = self.process_message(raw, client_ip)
                 if resp:
                     await websocket.send(json.dumps(resp))
         except Exception:

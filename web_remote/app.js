@@ -52,6 +52,18 @@ function loadSavedConfig() {
   } catch (e) {
     console.warn("Failed to load saved config:", e);
   }
+
+  // Smart host auto-detection:
+  // If this web page was opened via a specific IP or hostname (e.g. 192.168.x.x on mobile),
+  // NEVER allow a stale 'localhost' or '127.0.0.1' from localStorage to misdirect the connection.
+  const currentHost = window.location.hostname;
+  if (currentHost && currentHost !== "localhost" && currentHost !== "127.0.0.1") {
+    if (!config.host || config.host === "localhost" || config.host === "127.0.0.1") {
+      config.host = currentHost;
+    }
+  } else if (!config.host) {
+    config.host = currentHost || "127.0.0.1";
+  }
 }
 
 // Save settings to localStorage
@@ -130,7 +142,13 @@ function updateShortcutDockUI() {
 }
 
 function updateSettingsUI() {
-  settingHost.value = config.host;
+  const currentLoc = window.location.hostname;
+  if (currentLoc && currentLoc !== "localhost" && currentLoc !== "127.0.0.1") {
+    if (config.host === "localhost" || config.host === "127.0.0.1") {
+      config.host = currentLoc;
+    }
+  }
+  settingHost.value = config.host || currentLoc || "127.0.0.1";
   settingSensitivity.value = config.sensitivity;
   settingScroll.value = config.scrollSensitivity;
   settingAcceleration.checked = config.accelerationEnabled;
@@ -183,9 +201,17 @@ let socket = null;
 let isConnected = false;
 
 function connectWebSocket() {
-  const currentHost = config.host || window.location.hostname || "127.0.0.1";
+  const currentLoc = window.location.hostname;
+  let currentHost = config.host || currentLoc || "127.0.0.1";
+  if (currentLoc && currentLoc !== "localhost" && currentLoc !== "127.0.0.1") {
+    if (currentHost === "localhost" || currentHost === "127.0.0.1") {
+      currentHost = currentLoc;
+      config.host = currentLoc;
+    }
+  }
+
   const wsUrl = `ws://${currentHost}:${config.wsPort}`;
-  statusText.textContent = "Connecting...";
+  statusText.textContent = `Connecting to ${currentHost}...`;
   statusDot.className = "status-dot reconnecting";
 
   try {
@@ -196,7 +222,7 @@ function connectWebSocket() {
 
     socket.onopen = () => {
       isConnected = true;
-      statusText.textContent = "Connected";
+      statusText.textContent = `Connected (${currentHost})`;
       statusDot.className = "status-dot connected";
 
       // Sync settings with host
@@ -209,15 +235,17 @@ function connectWebSocket() {
 
     socket.onclose = () => {
       isConnected = false;
-      statusText.textContent = "Reconnecting...";
+      statusText.textContent = `Reconnecting (${currentHost})...`;
       statusDot.className = "status-dot reconnecting";
       setTimeout(connectWebSocket, 2000);
     };
 
     socket.onerror = () => {
+      statusText.textContent = `Error (${currentHost})`;
       socket.close();
     };
   } catch (e) {
+    statusText.textContent = `Error (${currentHost})`;
     setTimeout(connectWebSocket, 2000);
   }
 }

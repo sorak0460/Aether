@@ -89,10 +89,24 @@ from pynput.mouse import Controller as MouseController, Button
 from pynput.keyboard import Controller as KeyController, Key
 
 
+def ensure_attached_desktop():
+    if IS_WINDOWS:
+        try:
+            u32 = ctypes.windll.user32
+            hdesk = u32.OpenInputDesktop(0, False, 0x0100) # DESKTOP_HOOKCONTROL
+            if not hdesk:
+                hdesk = u32.OpenDesktopW("Default", 0, False, 0x01ff)
+            if hdesk:
+                u32.SetThreadDesktop(hdesk)
+        except Exception:
+            pass
+
+
 class StandaloneInputController:
     """Zero-latency OS-level input controller."""
 
     def __init__(self):
+        ensure_attached_desktop()
         self.pynput_mouse = MouseController()
         self.pynput_keyboard = KeyController()
 
@@ -157,31 +171,54 @@ class StandaloneInputController:
         if int_dx == 0 and int_dy == 0:
             return
 
+        moved = False
         if IS_WINDOWS:
-            extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
-            mi = MOUSEINPUT(int_dx, int_dy, 0, MOUSEEVENTF_MOVE, 0, extra)
-            inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=mi))
-            SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
-        else:
-            self.pynput_mouse.move(int_dx, int_dy)
+            try:
+                extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
+                mi = MOUSEINPUT(int_dx, int_dy, 0, MOUSEEVENTF_MOVE, 0, extra)
+                inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=mi))
+                res = SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                if res > 0:
+                    moved = True
+            except Exception:
+                pass
+
+        if not moved:
+            ensure_attached_desktop()
+            try:
+                pos = self.pynput_mouse.position
+                if pos is not None:
+                    self.pynput_mouse.position = (int(pos[0] + int_dx), int(pos[1] + int_dy))
+                else:
+                    self.pynput_mouse.move(int_dx, int_dy)
+            except Exception:
+                self.pynput_mouse.move(int_dx, int_dy)
 
     def click(self, button: str = "left"):
         """Click mouse button."""
+        clicked = False
         if IS_WINDOWS:
-            extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
-            if button == "left":
-                down_flag, up_flag = MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP
-            elif button == "right":
-                down_flag, up_flag = MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP
-            else:
-                down_flag, up_flag = MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP
+            try:
+                extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
+                if button == "left":
+                    down_flag, up_flag = MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP
+                elif button == "right":
+                    down_flag, up_flag = MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP
+                else:
+                    down_flag, up_flag = MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP
 
-            inputs = (INPUT * 2)(
-                INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, down_flag, 0, extra))),
-                INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, up_flag, 0, extra))),
-            )
-            SendInput(2, inputs, ctypes.sizeof(INPUT))
-        else:
+                inputs = (INPUT * 2)(
+                    INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, down_flag, 0, extra))),
+                    INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, up_flag, 0, extra))),
+                )
+                res = SendInput(2, inputs, ctypes.sizeof(INPUT))
+                if res >= 2:
+                    clicked = True
+            except Exception:
+                pass
+
+        if not clicked:
+            ensure_attached_desktop()
             btn = Button.left if button == "left" else (Button.right if button == "right" else Button.middle)
             self.pynput_mouse.click(btn)
 
@@ -191,11 +228,18 @@ class StandaloneInputController:
             if not self.is_dragging:
                 self.is_dragging = True
                 self._last_drag_time = time.time()
+                started = False
                 if IS_WINDOWS:
-                    extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
-                    inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, MOUSEEVENTF_LEFTDOWN, 0, extra)))
-                    SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
-                else:
+                    try:
+                        extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
+                        inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, MOUSEEVENTF_LEFTDOWN, 0, extra)))
+                        res = SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                        if res > 0:
+                            started = True
+                    except Exception:
+                        pass
+                if not started:
+                    ensure_attached_desktop()
                     self.pynput_mouse.press(Button.left)
 
     def end_drag(self):
@@ -203,44 +247,67 @@ class StandaloneInputController:
         with self._drag_safety_lock:
             if self.is_dragging:
                 self.is_dragging = False
+                ended = False
                 if IS_WINDOWS:
-                    extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
-                    inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, MOUSEEVENTF_LEFTUP, 0, extra)))
-                    SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
-                else:
+                    try:
+                        extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
+                        inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, 0, MOUSEEVENTF_LEFTUP, 0, extra)))
+                        res = SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                        if res > 0:
+                            ended = True
+                    except Exception:
+                        pass
+                if not ended:
+                    ensure_attached_desktop()
                     self.pynput_mouse.release(Button.left)
 
     def scroll(self, dx: float, dy: float):
         """Scroll mouse wheel."""
+        scrolled = False
         if IS_WINDOWS:
-            extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
-            if abs(dy) > 0.001:
-                # Windows WHEEL_DELTA is 120
-                wheel_delta = int(-dy * 60)
-                inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, wheel_delta, MOUSEEVENTF_WHEEL, 0, extra)))
-                SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
-        else:
+            try:
+                extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
+                if abs(dy) > 0.001:
+                    wheel_delta = int(-dy * 60)
+                    inp = INPUT(INPUT_MOUSE, _INPUT_UNION(mi=MOUSEINPUT(0, 0, wheel_delta, MOUSEEVENTF_WHEEL, 0, extra)))
+                    res = SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+                    if res > 0:
+                        scrolled = True
+            except Exception:
+                pass
+        if not scrolled:
+            ensure_attached_desktop()
             self.pynput_mouse.scroll(int(dx), int(-dy))
 
     def type_text(self, text: str):
         """Direct unicode text typing."""
         if not text:
             return
+        typed = False
         if IS_WINDOWS:
-            for char in text:
-                extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
-                code = ord(char)
-                inputs = (INPUT * 2)(
-                    INPUT(INPUT_KEYBOARD, _INPUT_UNION(ki=KEYBDINPUT(0, code, KEYEVENTF_UNICODE, 0, extra))),
-                    INPUT(INPUT_KEYBOARD, _INPUT_UNION(ki=KEYBDINPUT(0, code, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP, 0, extra))),
-                )
-                SendInput(2, inputs, ctypes.sizeof(INPUT))
-                time.sleep(0.002)
-        else:
+            try:
+                for char in text:
+                    extra = ctypes.c_ulonglong(0) if sys.maxsize > 2**32 else ctypes.c_ulong(0)
+                    code = ord(char)
+                    inputs = (INPUT * 2)(
+                        INPUT(INPUT_KEYBOARD, _INPUT_UNION(ki=KEYBDINPUT(0, code, KEYEVENTF_UNICODE, 0, extra))),
+                        INPUT(INPUT_KEYBOARD, _INPUT_UNION(ki=KEYBDINPUT(0, code, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP, 0, extra))),
+                    )
+                    res = SendInput(2, inputs, ctypes.sizeof(INPUT))
+                    if res < 2:
+                        break
+                    time.sleep(0.002)
+                else:
+                    typed = True
+            except Exception:
+                pass
+        if not typed:
+            ensure_attached_desktop()
             self.pynput_keyboard.type(text)
 
     def press_key(self, key_name: str):
         """Press special key."""
+        ensure_attached_desktop()
         key_map = {
             "esc": Key.esc,
             "enter": Key.enter,
@@ -257,6 +324,7 @@ class StandaloneInputController:
 
     def execute_shortcut(self, action: str):
         """Execute keyboard shortcuts or mouse actions."""
+        ensure_attached_desktop()
         act = str(action).lower().strip()
         ctrl = Key.ctrl
         alt = Key.alt
