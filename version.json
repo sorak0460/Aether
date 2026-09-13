@@ -1,8 +1,8 @@
 {
-  "version": "2.2.0",
-  "release_date": "2026-09-12",
-  "title": "Aether v2.2.0 - Magic Mouse Mode & Custom Shortcuts",
-  "notes": "机にスマホを平らに置いてマウスのように使えるMagicMouseモード追加、個別ショートカット割当、大型クリックゾーンに対応",
+  "version": "2.3.0",
+  "release_date": "2026-09-13",
+  "title": "Aether v2.3.0 - APK Support (USB, Bluetooth, Wi-Fi Direct)",
+  "notes": "APKモード追加（USB手動デバイス選択・自動ADBブリッジ・Wi-Fi直接接続・Bluetooth RFCOMM対応）、Windows 11デスクトップ入力制御強化",
   "exe_url": "https://raw.githubusercontent.com/sorak0460/Aether/main/Aether_Setup.exe",
-  "size_bytes": 20985051
+  "size_bytes": 20998724
 }
